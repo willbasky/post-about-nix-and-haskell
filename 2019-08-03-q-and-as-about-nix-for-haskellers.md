@@ -56,13 +56,19 @@ shows an example of defining a derivation for the GNU
 [hello](https://www.gnu.org/software/hello/hello.html) package[^1]:
 
 ```nix
-stdenv.mkDerivation {
+let
+  pkgs = import <nixpkgs> {};
+in
+pkgs.stdenv.mkDerivation {
   name = "hello-2.1.1";
   builder = ./builder.sh;
-  src = fetchurl {
+  src = pkgs.fetchurl {
     url = ftp://ftp.nluug.nl/pub/gnu/hello/hello-2.1.1.tar.gz;
-    sha256 = "1md7jsfd8pa45z73bz1kszpp01yw6x5ljkjk2hx7wl800any6465";
+    sha256 = "c510e3ad0200517e3a14534e494b37dc0770efd733fc35ce2f445dd49c96a7d5";
   };
+  perl = pkgs.perl;
+  help2man = pkgs.help2man;
+}
 ```
 
 As far as the Nix language is concerned, you can think of a derivation as a
@@ -70,7 +76,7 @@ dictionary of key-value pairs.  Some of the keys (and corresponding values) are
 considered "special".  For instance, in the above definition, `builder` is a
 special key that corresponds to a shell script.  The shell script contains
 commands like `./configure && make && make install` that will be used to
-build and install the package.
+build and install the package (see `./builder.sh` in current directory).
 
 Nix has a few well-known CLI tools.  In this article I will mostly talk about
 `nix-build` and `nix-shell`.  `nix-build` would take the above derivation and
@@ -79,10 +85,10 @@ above derivation to run shell scripts to build and install the binaries, shared
 objects, header files, and other files associated with the package.[^2]
 
 For instance, if the above derivation is saved in a file called
-`my-first-derivation.nix`, you can build it with the following command:[^3]
+`hello.nix`, you can build it with the following command:[^3]
 
 ```
-$ nix-build ./my-first-derivation.nix
+$ nix-build ./hello.nix
 ```
 
 This produces a directory in the Nix store called something like
